@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP32 Web Server</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <h1>ESP32 Web Server</h1>
+  <p>GPIO state: <strong> %STATE%</strong></p>
+  <p><a href="/on"><button class="button">ON</button></a></p>
+  <p><a href="/off"><button class="button button2">OFF</button></a></p>
+  <p>
+    <label>LED Count: <span id="ledCount-text">7</span></label>
+    <input type="range" name="ledCount" id="ledCount" min="7" max="10" step="1" value="7" onchange="changeLedCount(this.value)">
+  </p>
+  <p>
+    <label>Brightness <span id="brightness-text">50</span></label>
+    <input type="range" name="brightness" id="brightness" min="0" max="255" step="5" value="50" onchange="changeBrightness(this.value)">
+    <input type="text" name="manualBrightness" id="manualBrightness" onchange="changeBrightness(this.value)">
+  </p>
+  <input type="color" name="baseColor" id="baseColor" onchange="changeColor(this.value)">
+  <button onclick="changePattern('solid')">Solid</button>
+  <button onclick="changePattern('pulse')">Pulse</button>
+  <button onclick="changePattern('confetti')">Confetti</button>
+  <button onclick="changePattern('rainbow')">Rainbow</button>
+  <button onclick="changePattern('cycle')">Cycle</button>
+  <pre id="serverResponse"></pre>
+  <script>
+    (function(){
+      console.log('document ready')
+    })();
+
+    const serverResponse = document.getElementById('serverResponse');
+
+    function changeColor(color) {
+      color = color.slice(1);
+      console.log("color changed", color);
+      fetch('/changeColor?color='+color)
+        .then(response => response.text())
+        .then(data => {
+          serverResponse.innerText = data;
+        })
+        .catch(err=>{
+          console.error(err);
+          serverResponse.innerText = err;
+        })
+    }
+
+    function changePattern(pattern) {
+      console.log("pattern changed", pattern);
+      fetch('/changePattern?pattern='+pattern)
+        .then(response => response.text())
+        .then(data => {
+          serverResponse.innerText = data;
+        })
+        .catch(err=>{
+          console.error(err);
+          serverResponse.innerText = err;
+        })
+    }
+
+    function changeBrightness(brightness) {
+      console.log("brightness changed", brightness);
+      fetch('/changeBrightness?brightness='+brightness)
+        .then(response => response.text())
+        .then(data => {
+          updatePropertyText('brightness');
+          serverResponse.innerText = data;
+        })
+        .catch(err=>{
+          console.error(err);
+          serverResponse.innerText = err;
+        })
+    }
+
+    function changeLedCount(ledCount) {
+      console.log("ledCount changed", ledCount);
+      fetch('/changeLedCount?ledCount='+ledCount)
+        .then(response => response.text())
+        .then(data => {
+          updatePropertyText('ledCount');
+          serverResponse.innerText = data;
+        })
+        .catch(err=>{
+          console.error(err);
+          serverResponse.innerText = err;
+        })
+    }
+
+    function updatePropertyText(propertyId) {
+      document.getElementById(propertyId + '-text').innerHTML = document.getElementById(propertyId).value;
+    }
+  </script>
+</body>
+</html>
