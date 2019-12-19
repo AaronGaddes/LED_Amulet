@@ -13,7 +13,7 @@
 // #include "FastLED.h"
 
 // ############## ESP8266 ##############
-// #include <Arduino.h>
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 // #include <ESP8266WebServer.h>
@@ -361,6 +361,15 @@ void setup(){
     request->send(200, "text/plain", "led count changed to " + ledCount);
   });
 
+  server.onNotFound([](AsyncWebServerRequest *request) {
+  if (request->method() == HTTP_OPTIONS) {
+    request->send(200);
+  } else {
+    request->send(404);
+  }
+});
+
+DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   // Start server
   server.begin();
 }
